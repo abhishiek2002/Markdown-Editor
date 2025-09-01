@@ -1,0 +1,24 @@
+*{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+body{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 0;
+    width: 100svw;
+}
+textarea {
+  height: 100svh;
+  float: left;
+  resize: none;
+}
+#preview {
+  height: 100svh;
+  float: right;
+  border: 1px solid #ccc;
+  padding: 25px;
+  overflow-y: scroll;
+}
