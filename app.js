@@ -14,11 +14,35 @@ async function init() {
 }
 
 function parseMarkdown(markdown) {
-  // first handle # lines
-
   const lines = markdown.split("\n");
+  let htmlLines = [];
+  let insideCodeBlock = false;
 
-  const html = lines.map((line) => {
+
+  // console.log(lines);
+  
+
+  for (let line of lines) {
+    // code block ```
+
+    if(line.trim().startsWith("```")){
+      insideCodeBlock = !insideCodeBlock;
+      line = insideCodeBlock ? "<pre><code>" : "</code></pre>";
+    }
+
+    if(insideCodeBlock){
+      htmlLines.push(line);  // no parsing inside code blocks
+      continue;
+    }
+
+    // blockquote
+
+    if (line.startsWith('> ')) {
+      line = `<blockquote>${line.slice(2)}</blockquote>`;
+      htmlLines.push(line);
+      continue;
+    }
+
     // link
 
     line = line.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
@@ -35,41 +59,55 @@ function parseMarkdown(markdown) {
 
     line = line.replace(/~~(.*?)~~/g, "<del>$1</del>");
 
-    // code ` `
+    // inline code ` `
 
     line = line.replace(/`(.*?)`/g, "<code>$1</code>");
 
     // list
 
-    if (line.startsWith("- ") || line.startsWith("* ")) line = `<li> ${line.slice(2)} </li>`;
+    if (line.startsWith("- ") || line.startsWith("* ")){
+      line = `<li> ${line.slice(2)} </li>`;
+      htmlLines.push(line);
+      continue;
+    }
 
-    //   aggregating li into ul
-    
 
     // headings
+    // first handle # lines
 
     if (line.startsWith("# ")) {
-      return `<h1> ${line.slice(2)} </h1><hr>`;
+      line = `<h1> ${line.slice(2)} </h1>`;
+      htmlLines.push(line);
+      continue;
     }
     if (line.startsWith("## ")) {
-      return `<h2> ${line.slice(3)} </h2><hr>`;
+      line = `<h2> ${line.slice(3)} </h2>`;
+      htmlLines.push(line);
+      continue;
     }
     if (line.startsWith("### ")) {
-      return `<h3> ${line.slice(4)} </h3><hr>`;
+      line = `<h3> ${line.slice(4)} </h3>`;
+      htmlLines.push(line);
+      continue;
     }
     if (line.startsWith("#### ")) {
-      return `<h4> ${line.slice(5)} </h4><hr>`;
+      line = `<h4> ${line.slice(5)} </h4>`;
+      htmlLines.push(line);
+      continue;
     }
     if (line.startsWith("##### ")) {
-      return `<h5> ${line.slice(6)} </h5><hr>`;
+      line = `<h5> ${line.slice(6)} </h5>`;
+      htmlLines.push(line);
+      continue;
     }
     if (line.startsWith("###### ")) {
-      return `<h6> ${line.slice(7)} </h6><hr>`;
+      line = `<h6> ${line.slice(7)} </h6>`;
+      htmlLines.push(line);
+      continue;
     }
 
-    return `<p> ${line} </p>`;
-  });
+    htmlLines.push(`<p>${line}</p>`);
+  }
 
-
-  return html.join("\n");
+  return htmlLines.join("\n");
 }
