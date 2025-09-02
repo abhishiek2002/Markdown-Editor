@@ -4,7 +4,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 async function init() {
   const inputArea = document.getElementById("markdown-input");
-  const previewArea = document.getElementById("preview");
+  const previewArea = document.getElementById("html-output");
 
   inputArea.addEventListener("input", () => {
     const markdownText = inputArea.value;
@@ -56,7 +56,7 @@ function parseMarkdown(markdown) {
       htmlLines.push(line);
       continue;
     }
-    
+
     // image
 
     line = line.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2" />`);

@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown Editor</title>
+    <title>Markdown Live Preview</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <textarea id="markdown-input" placeholder="Type Markdown here..."></textarea>
-        <div id="preview" class="markdown-body"></div>
+        <div class="input-area">
+            <textarea id="markdown-input" placeholder="Type your Markdown here..."></textarea>
+        </div>
+        <div class="output-area">
+            <div id="html-output"></div>
+        </div>
     </div>
-    <script type="module" src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="app.js" type="module"></script>
 </body>
 </html>
