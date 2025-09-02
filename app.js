@@ -16,36 +16,55 @@ async function init() {
 function parseMarkdown(markdown) {
   const lines = markdown.split("\n");
   let htmlLines = [];
+  let insideUl = false;
+  let insideOl = false;
   let insideCodeBlock = false;
 
-
   // console.log(lines);
-  
 
   for (let line of lines) {
+    // close ul list if it should
+
+    if (!line.startsWith("- ") && !line.startsWith("* ") && insideUl) {
+      insideUl = false;
+      htmlLines.push("</ul>");
+    }
+
+    // close ol list if it should
+
+    if (!(/^\d+\. /.test(line)) && insideOl) {
+      insideOl = false;
+      htmlLines.push("</ol>");
+    }
+
     // code block ```
 
-    if(line.trim().startsWith("```")){
+    if (line.trim().startsWith("```")) {
       insideCodeBlock = !insideCodeBlock;
       line = insideCodeBlock ? "<pre><code>" : "</code></pre>";
     }
 
-    if(insideCodeBlock){
-      htmlLines.push(line);  // no parsing inside code blocks
+    if (insideCodeBlock) {
+      htmlLines.push(line); // no parsing inside code blocks
       continue;
     }
 
     // blockquote
 
-    if (line.startsWith('> ')) {
+    if (line.startsWith("> ")) {
       line = `<blockquote>${line.slice(2)}</blockquote>`;
       htmlLines.push(line);
       continue;
     }
+    
+    // image
+
+    line = line.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2" />`);
 
     // link
 
     line = line.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+
 
     // bold
 
@@ -63,14 +82,41 @@ function parseMarkdown(markdown) {
 
     line = line.replace(/`(.*?)`/g, "<code>$1</code>");
 
-    // list
+    // horizontal line
 
-    if (line.startsWith("- ") || line.startsWith("* ")){
-      line = `<li> ${line.slice(2)} </li>`;
-      htmlLines.push(line);
+    if (/^---+$/.test(line.trim())) {
+      htmlLines.push("<hr/>");
       continue;
     }
 
+    // list
+
+    // open unorder list
+    if (line.startsWith("- ") || line.startsWith("* ")) {
+      if (!insideUl) {
+        insideUl = true;
+        htmlLines.push("<ul>");
+        line = `<li> ${line.slice(2)} </li>`;
+        htmlLines.push(line);
+        continue;
+      } else {
+        htmlLines.push(`<li> ${line.slice(2)} </li>`);
+        continue;
+      }
+    }
+
+    // open order list
+
+    if (/^\d+\. /.test(line)) {
+      if (!insideOl) {
+        htmlLines.push(`<ol type="${line[0]}">`);
+        insideOl = true;
+        htmlLines.push(`<li>${line.replace(/^\d+\. /, '')}`);
+      } else {
+        htmlLines.push(`<li>${line.replace(/^\d+\. /, '')}`);
+      }
+      continue;
+    }
 
     // headings
     // first handle # lines
